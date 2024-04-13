@@ -5,12 +5,15 @@ spark = SparkSession.builder \
     .appName("books") \
     .getOrCreate()
 
+# READ
 df = spark.read.format("mongo") \
     .option("uri", "mongodb://192.168.1.16:27017/test.books") \
     .load()
 
+# ADD TIMESTAMP
 df = df.withColumn("uploaddate", current_timestamp())
 
+# WRITE
 server_target = "192.168.1.16:5432"
 db_target = "internal"
 user_target = "postgres"
@@ -26,3 +29,5 @@ df.write.format("jdbc") \
     .option("password", password_target) \
     .mode(mode_write) \
     .save()
+
+spark.stop()

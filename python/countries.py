@@ -5,14 +5,17 @@ spark = SparkSession.builder \
     .appName("countries") \
     .config("spark.jars.packages", "org.mongodb.spark:mongo-spark-connector_2.12:3.0.0,org.postgresql:postgresql:42.7.3") \
     .getOrCreate()
+#spark.jars.package untuk download dependency dari maven untuk pertama kali, setelah itu akan tersimpan di .ivy2/jars/
 
+# READ
 df = spark.read.format("mongo") \
     .option("uri", "mongodb://192.168.1.16:27017/test.countries") \
     .load()
 
+# ADD TIMESTAMP
 df = df.withColumn("uploaddate", current_timestamp())
-df = df.withColumn("_id", df['_id'].getField("oid").cast("string"))
 
+# WRITE
 server_target = "192.168.1.16:5432"
 db_target = "internal"
 user_target = "postgres"
@@ -28,3 +31,5 @@ df.write.format("jdbc") \
     .option("password", password_target) \
     .mode(mode_write) \
     .save()
+
+spark.stop()
